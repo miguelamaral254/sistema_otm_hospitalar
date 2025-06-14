@@ -1,0 +1,19 @@
+# Ignorar ambientes virtuais
+venv_python39/
+
+# Ignorar arquivos de log
+*.log
+
+# Ignorar arquivos de sistema (ex: MacOS)
+.DS_Store
+
+# Ignorar arquivos específicos de IDEs
+.vscode/
+.idea/
+
+# Ignorar arquivos gerados
+*.csv
+*.parquet
+
+# Ignorar diretórios de cache do Python
+__pycache__/

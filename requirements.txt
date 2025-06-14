@@ -1,0 +1,10 @@
+pyspark
+requests
+pandas
+scikit-learn
+pyarrow
+beautifulsoup4
+kagglehub
+matplotlib
+seaborn
+tensorflow
