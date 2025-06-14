@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+from unidecode import unidecode
 
 def clean_data(file_path, skip_rows=7, delimiter=';'):
     data = pd.read_csv(file_path, encoding='ISO-8859-1', sep=delimiter, skiprows=skip_rows)
@@ -21,11 +22,18 @@ def transform_data(data):
     for _, row in data.iterrows():
         region_uf = row['Região/UF']
         for i, year in enumerate(years):
-            year_data = row.iloc[i+1:i+13].values
+            year_data = row.iloc[i*12+1:i*12+13].values
             for month, value in zip(range(1, 13), year_data):
                 transformed_data.append([region_uf, year, month, value])
     transformed_df = pd.DataFrame(transformed_data, columns=['Região/UF', 'Ano', 'Mês', 'Valor'])
     return transformed_df
+
+def remove_accents_and_rename(df):
+    df.columns = [unidecode(col) for col in df.columns]
+    for col in df.select_dtypes(include=['object']).columns:
+        df[col] = df[col].apply(lambda x: unidecode(x) if isinstance(x, str) else x)
+    df = df.rename(columns={'Regiao/UF': 'UF'})
+    return df
 
 raw_data_path = 'src/data/raw'
 cleaned_data_path = 'src/data/cleaned'
@@ -42,6 +50,8 @@ for year in years:
         year_data = clean_data(file_path)
         transformed_data = transform_data(year_data)
         all_data = pd.concat([all_data, transformed_data], ignore_index=True)
+
+all_data = remove_accents_and_rename(all_data)
 
 output_file = os.path.join(cleaned_data_path, 'Obitos_Regiao_Nordeste_2020_2024_Limpo.csv')
 all_data.to_csv(output_file, index=False)

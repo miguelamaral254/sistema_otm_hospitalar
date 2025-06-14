@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+from unidecode import unidecode
 
 def clean_data(file_path, skip_rows=7, delimiter=';'):
     data = pd.read_csv(file_path, encoding='ISO-8859-1', sep=delimiter, skiprows=skip_rows)
@@ -21,8 +22,15 @@ def transform_data(data):
         sus_value = row.iloc[1]
         nao_sus_value = row.iloc[2]
         transformed_data.append([region_uf, sus_value, nao_sus_value])
-    transformed_df = pd.DataFrame(transformed_data, columns=['Região/Unidade da Federação', 'Quantidade_SUS', 'Quantidade_Não_SUS'])
+    transformed_df = pd.DataFrame(transformed_data, columns=['Região/Unidade da Federação', 'Quantidade_SUS', 'Quantidade_Nao_SUS'])
     return transformed_df
+
+def remove_accents_and_rename(df):
+    df.columns = [unidecode(col) for col in df.columns]
+    for col in df.select_dtypes(include=['object']).columns:
+        df[col] = df[col].apply(lambda x: unidecode(x) if isinstance(x, str) else x)
+    df = df.rename(columns={'Regiao/Unidade da Federacao': 'UF'})
+    return df
 
 raw_data_path = 'src/data/raw'
 cleaned_data_path = 'src/data/cleaned'
@@ -48,7 +56,8 @@ for year in years:
         print(f"O arquivo {file_name} não foi encontrado.")
 
 if not all_data.empty:
-    output_file = os.path.join(cleaned_data_path, 'LEITO_SUS_E_NAO_SUS_2020_2024_Limpo.csv')
+    all_data = remove_accents_and_rename(all_data)
+    output_file = os.path.join(cleaned_data_path, 'Leitos_SUS_e_Nao_SUS_2020_2024_Limpo.csv')
     all_data.to_csv(output_file, index=False)
     print("Todos os arquivos foram processados e salvos com sucesso!")
 else:
