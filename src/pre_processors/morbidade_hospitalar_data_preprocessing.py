@@ -69,7 +69,7 @@ for year in years:
 
 if not all_data.empty:
     all_data = remove_accents_and_rename(all_data)
-    output_file = os.path.join(cleaned_data_path, 'Obitos_Regiao_Nordeste_2020_2024_Limpo.csv')
+    output_file = os.path.join(cleaned_data_path, 'Morbidade_Hospitalar_Regiao_Nordeste_2020_2024_Limpo.csv')
     all_data.to_csv(output_file, index=False)
     print("Todos os arquivos foram processados e salvos com sucesso!")
 else:

@@ -20,17 +20,16 @@ def processar_doses_vacinas():
             print(f"Erro: O arquivo {file_path} não existe!")
             return None
 
-    # Lê o arquivo de doses
     df_doses = ler_csv(arquivo_doses)
     if df_doses is None:
         print("Erro: Não foi possível carregar os dados de doses de vacinas.")
         return
 
-    print(f"Colunas lidas: {df_doses.columns}")
+    #print(f"Colunas lidas: {df_doses.columns}")
 
     df_doses = df_doses.toDF(*[col_name.strip().replace(' ', '_').lower() for col_name in df_doses.columns])
 
-    print(f"Colunas normalizadas: {df_doses.columns}")
+    #print(f"Colunas normalizadas: {df_doses.columns}")
 
     df_doses = df_doses.withColumn("primeira_dose", col("primeira_dose").cast("double")) \
                        .withColumn("segunda_dose", col("segunda_dose").cast("double")) \
