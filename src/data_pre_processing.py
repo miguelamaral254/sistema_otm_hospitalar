@@ -20,8 +20,8 @@ if not os.path.exists(cleaned_data_path):
 
 #run_script(influenza_script)
 #run_script(equipes_script)
-run_script(estabelecimentos_script)
-#run_script(morbidade_hosp_script)
+#run_script(estabelecimentos_script)
+run_script(morbidade_hosp_script)
 #run_script(leitos_script)
 #run_script(vacinas_script)
 

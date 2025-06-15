@@ -14,42 +14,48 @@ def clean_data(file_path, skip_rows=7, delimiter=';'):
     elif data.columns[0] != 'UF':
         data = data.rename(columns={data.columns[0]: 'UF'})
     data = data.loc[:, ~data.columns.str.contains('^Total', regex=True)]
-    data.columns = [unidecode(col) for col in data.columns]
+    data.columns = [unidecode(col).replace(' ', '_') for col in data.columns]
+
     for col in data.select_dtypes(include=['object']).columns:
         data[col] = data[col].apply(lambda x: unidecode(x) if isinstance(x, str) else x)
+    
     data['UF'] = data['UF'].apply(lambda x: str(x).replace('..', '').strip())
     return data
 
 def transform_data(data, year):
     unit_columns = [
-        "POSTO DE SAUDE", "CENTRO DE SAUDE/UNIDADE BASICA", "POLICLINICA", "HOSPITAL GERAL", "HOSPITAL ESPECIALIZADO", 
-        "UNIDADE MISTA", "PRONTO SOCORRO GERAL", "PRONTO SOCORRO ESPECIALIZADO", "CONSULTORIO ISOLADO", 
-        "CLINICA/CENTRO DE ESPECIALIDADE", "UNIDADE DE APOIO DIAGNOSE E TERAPIA (SADT ISOLADO)", 
-        "UNIDADE MOVEL TERRESTRE", "UNIDADE MOVEL DE NIVEL PRE-HOSPITALAR NA AREA DE URGENCIA", "FARMACIA", 
-        "UNIDADE DE VIGILANCIA EM SAUDE", "COOPERATIVA OU EMPRESA DE CESSAO DE TRABALHADORES NA SAUDE", 
-        "CENTRO DE PARTO NORMAL - ISOLADO", "HOSPITAL/DIA - ISOLADO", "CENTRAL DE REGULACAO DE SERVICOS DE SAUDE", 
-        "LABORATORIO CENTRAL DE SAUDE PUBLICA LACEN", "CENTRAL DE GESTAO EM SAUDE", 
-        "CENTRO DE ATENCAO HEMOTERAPIA E OU HEMATOLOGICA", "CENTRO DE ATENCAO PSICOSSOCIAL", 
-        "CENTRO DE APOIO A SAUDE DA FAMILIA", "UNIDADE DE ATENCAO A SAUDE INDIGENA", "PRONTO ATENDIMENTO", 
-        "POLO ACADEMIA DA SAUDE", "TELESSAUDE", "CENTRAL DE REGULACAO MEDICA DAS URGENCIAS", 
-        "SERVICO DE ATENCAO DOMICILIAR ISOLADO(HOME CARE)", "UNIDADE DE ATENCAO EM REGIME RESIDENCIAL", 
-        "OFICINA ORTOPEDICA", "LABORATORIO DE SAUDE PUBLICA", "CENTRAL DE REGULACAO DO ACESSO", 
-        "CENTRAL DE NOTIFICACAO,CAPTACAO E DISTRIB DE ORGAOS ESTADUAL", 
-        "POLO DE PREVENCAO DE DOENCAS E AGRAVOS E PROMOCAO DA SAUDE", "CENTRAL DE ABASTECIMENTO", "CENTRO DE IMUNIZACAO"
+        "POSTO_DE_SAUDE", "CENTRO_DE_SAUDE_UNIDADE_BASICA", "POLICLINICA", "HOSPITAL_GERAL", "HOSPITAL_ESPECIALIZADO", 
+        "UNIDADE_MISTA", "PRONTO_SOCORRO_GERAL", "PRONTO_SOCORRO_ESPECIALIZADO", "CONSULTORIO_ISOLADO", 
+        "CLINICA_CENTRO_DE_ESPECIALIDADE", "UNIDADE_DE_APOIO_DIAGNOSE_E_TERAPIA_SADT_ISOLADO", 
+        "UNIDADE_MOVEL_TERRESTRE", "UNIDADE_MOVEL_DE_NIVEL_PRE_HOSPITALAR_NA_AREA_DE_URGENCIA", "FARMACIA", 
+        "UNIDADE_DE_VIGILANCIA_EM_SAUDE", "COOPERATIVA_OU_EMPRESA_DE_CESSAO_DE_TRABALHADORES_NA_SAUDE", 
+        "CENTRO_DE_PARTO_NORMAL_ISOLADO", "HOSPITAL_DIA_ISOLADO", "CENTRAL_DE_REGULACAO_DE_SERVICOS_DE_SAUDE", 
+        "LABORATORIO_CENTRAL_DE_SAUDE_PUBLICA_LACEN", "CENTRAL_DE_GESTAO_EM_SAUDE", 
+        "CENTRO_DE_ATENCAO_HEMOTERAPIA_E_OU_HEMATOLOGICA", "CENTRO_DE_ATENCAO_PSICOSSOCIAL", 
+        "CENTRO_DE_APOIO_A_SAUDE_DA_FAMILIA", "UNIDADE_DE_ATENCAO_A_SAUDE_INDIGENA", "PRONTO_ATENDIMENTO", 
+        "POLO_ACADEMIA_DA_SAUDE", "TELESSAUDE", "CENTRAL_DE_REGULACAO_MEDICA_DAS_URGENCIAS", 
+        "SERVICO_DE_ATENCAO_DOMICILIAR_ISOLADO_HOME_CARE", "UNIDADE_DE_ATENCAO_EM_REGIME_RESIDENCIAL", 
+        "OFICINA_ORTOPEDICA", "LABORATORIO_DE_SAUDE_PUBLICA", "CENTRAL_DE_REGULACAO_DO_ACESSO", 
+        "CENTRAL_DE_NOTIFICACAO_CAPTACAO_E_DISTRIB_DE_ORGAOS_ESTADUAL", 
+        "POLO_DE_PREVENCAO_DE_DOENCAS_E_AGRAVOS_E_PROMOCAO_DA_SAUDE", "CENTRAL_DE_ABASTECIMENTO", "CENTRO_DE_IMUNIZACAO"
     ]
     
     transformed_data = []
     
     for _, row in data.iterrows():
         uf = row['UF']
+        year_data = {'UF': uf, 'Ano': year}
+        
         for i, val in enumerate(row[1:]):
             if i < len(unit_columns):
                 unit_name = unit_columns[i]
                 if isinstance(val, str) and val in ['-', 'nan', 'N/A', 'null']:
                     val = 0
-                transformed_data.append([uf, year, unit_name, int(val) if pd.notna(val) else 0])
+                year_data[unit_name] = int(val) if pd.notna(val) else 0
+        
+        transformed_data.append(year_data)
     
-    return pd.DataFrame(transformed_data, columns=['UF', 'Ano', 'Tipo_de_Estabelecimento', 'Valor'])
+    return pd.DataFrame(transformed_data)
 
 raw_data_path = 'src/data/raw'
 cleaned_data_path = 'src/data/cleaned'

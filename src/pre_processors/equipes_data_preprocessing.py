@@ -24,7 +24,6 @@ def clean_data(file_path, skip_rows=7, delimiter=';'):
     return data
 
 def transform_data(data, year):
-    transformed_data = []
     team_keywords = [
         "ESF - EQUIPE DE SAUDE DA FAMILIA", "ESF COM SAUDE BUCAL", 
         "EACS - EQUIPE DE AGENTES COMUNITARIOS DE SAUDE", "NASF - NUCLEO DE APOIO A SAUDE", 
@@ -43,17 +42,27 @@ def transform_data(data, year):
         name = re.sub(r'[^A-Za-z0-9_]', '', name)
         return name.upper()
     
+    transformed_data = []
     for _, row in data.iterrows():
         uf = row['UF']
+        year_data = {'UF': uf, 'Ano': year}  # Inicializando com UF e Ano
+        
         for i, val in enumerate(row[1:]):
             if i < len(team_keywords):
                 team_name = clean_team_name(team_keywords[i])
-                transformed_data.append([uf, year, team_name, int(val) if pd.notna(val) else 0])
-    return pd.DataFrame(transformed_data, columns=['UF', 'Ano', 'Tipo_de_Equipe', 'Valor'])
+                # Substituir valores inválidos como "-" por 0
+                if isinstance(val, str) and val in ['-', 'nan', 'N/A', 'null']:
+                    val = 0
+                year_data[team_name] = int(val) if pd.notna(val) else 0
+        
+        transformed_data.append(year_data)
+    
+    return pd.DataFrame(transformed_data)
 
 def process_files(raw_path, cleaned_path, start_year=2020, end_year=2024):
     if not os.path.exists(cleaned_path):
         os.makedirs(cleaned_path)
+    
     all_data = pd.DataFrame()
     for year in range(start_year, end_year + 1):
         file_name = f'Equipes Saúde {year}.csv'
@@ -62,6 +71,7 @@ def process_files(raw_path, cleaned_path, start_year=2020, end_year=2024):
             data = clean_data(file_path)
             transformed = transform_data(data, year)
             all_data = pd.concat([all_data, transformed], ignore_index=True)
+    
     output_file = os.path.join(cleaned_path, 'Equipes_Saude_2020_2024_Limpo.csv')
     all_data.to_csv(output_file, index=False)
 
