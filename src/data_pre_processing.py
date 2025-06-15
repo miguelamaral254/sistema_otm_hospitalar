@@ -20,9 +20,9 @@ if not os.path.exists(cleaned_data_path):
 
 #run_script(influenza_script)
 #run_script(equipes_script)
-#run_script(estabelecimentos_script)
+run_script(estabelecimentos_script)
 #run_script(obitos_script)
 #run_script(leitos_script)
-run_script(vacinas_script)
+#run_script(vacinas_script)
 
 print("Todos os arquivos foram processados e salvos com sucesso!")

@@ -19,17 +19,16 @@ def transform_data(data):
     transformed_data = []
     for _, row in data.iterrows():
         region_uf = row['Região/Unidade da Federação']
-        sus_value = row.iloc[1]
-        nao_sus_value = row.iloc[2]
+        sus_value = int(row.iloc[1]) if pd.notna(row.iloc[1]) else 0  # Garantir que seja inteiro
+        nao_sus_value = int(row.iloc[2]) if pd.notna(row.iloc[2]) else 0  # Garantir que seja inteiro
         transformed_data.append([region_uf, sus_value, nao_sus_value])
     transformed_df = pd.DataFrame(transformed_data, columns=['Região/Unidade da Federação', 'Quantidade_SUS', 'Quantidade_Nao_SUS'])
     return transformed_df
 
 def remove_accents_and_rename(df):
     df.columns = [unidecode(col) for col in df.columns]
-    for col in df.select_dtypes(include=['object']).columns:
-        df[col] = df[col].apply(lambda x: unidecode(x) if isinstance(x, str) else x)
-    df = df.rename(columns={'Regiao/Unidade da Federacao': 'UF'})
+    df = df.rename(columns={'Regiao/Unidade da Federacao': 'UF'})  # Renomear coluna corretamente
+    df['UF'] = df['UF'].apply(lambda x: unidecode(str(x)).replace('..', '').strip())  # Remover '..' dos dados de UF
     return df
 
 raw_data_path = 'src/data/raw'

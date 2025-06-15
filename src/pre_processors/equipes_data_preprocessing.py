@@ -1,10 +1,12 @@
-import pandas as pd
 import os
 import re
+import pandas as pd
 from unidecode import unidecode
+import warnings
+
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 def clean_data(file_path, skip_rows=7, delimiter=';'):
-    print(f"Lendo o arquivo: {file_path}")
     data = pd.read_csv(file_path, encoding='ISO-8859-1', sep=delimiter, skiprows=skip_rows)
     data = data[~data.iloc[:, 0].str.contains('Fonte:|Nota:|Morbidade|Cadastro Nacional|Sistema de|Período', na=False)]
     total_index = data[data.iloc[:, 0].str.contains('Total', na=False)].index
@@ -18,7 +20,7 @@ def clean_data(file_path, skip_rows=7, delimiter=';'):
     data = data.dropna(subset=['UF'])
     data = data.replace('-', 0)
     data.iloc[:, 1:] = data.iloc[:, 1:].apply(pd.to_numeric, errors='coerce')
-    data['UF'] = data['UF'].apply(lambda x: unidecode(str(x)))
+    data['UF'] = data['UF'].apply(lambda x: unidecode(str(x)).replace('..', '').strip())
     return data
 
 def transform_data(data, year):
@@ -34,17 +36,19 @@ def transform_data(data, year):
         "EABP1SM - EQ ATENCAO BASICA PRISIONAL TIPO I C SAUDE MENTAL", "EABP2 - EQ ATENCAO BASICA PRISIONAL TIPO II", 
         "EABP2SM - EQ ATENCAO BASICA PRISIONAL TIPO II C SAUDE MENTAL", "EABP3 - EQ ATENCAO BASICA PRISIONAL TIPO III"
     ]
+    
     def clean_team_name(name):
         name = re.sub(r'^\d+_', '', name)
         name = re.sub(r'[ \-]+', '_', name)
         name = re.sub(r'[^A-Za-z0-9_]', '', name)
         return name.upper()
+    
     for _, row in data.iterrows():
         uf = row['UF']
         for i, val in enumerate(row[1:]):
             if i < len(team_keywords):
                 team_name = clean_team_name(team_keywords[i])
-                transformed_data.append([uf, year, team_name, val])
+                transformed_data.append([uf, year, team_name, int(val) if pd.notna(val) else 0])
     return pd.DataFrame(transformed_data, columns=['UF', 'Ano', 'Tipo_de_Equipe', 'Valor'])
 
 def process_files(raw_path, cleaned_path, start_year=2020, end_year=2024):
@@ -55,16 +59,11 @@ def process_files(raw_path, cleaned_path, start_year=2020, end_year=2024):
         file_name = f'Equipes Saúde {year}.csv'
         file_path = os.path.join(raw_path, file_name)
         if os.path.exists(file_path):
-            print(f"Iniciando processamento do arquivo para {year}...")
             data = clean_data(file_path)
             transformed = transform_data(data, year)
             all_data = pd.concat([all_data, transformed], ignore_index=True)
-            print(f"Arquivo para {year} processado com sucesso.")
-        else:
-            print(f"Arquivo para {year} não encontrado.")
     output_file = os.path.join(cleaned_path, 'Equipes_Saude_2020_2024_Limpo.csv')
     all_data.to_csv(output_file, index=False)
-    print(f"Arquivo salvo em: {output_file}")
 
 if __name__ == "__main__":
     raw_data_path = 'src/data/raw'

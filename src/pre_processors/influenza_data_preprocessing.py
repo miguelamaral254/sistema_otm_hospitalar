@@ -14,6 +14,7 @@ def clean_data(file_path, skip_rows=7, delimiter=';'):
         data = data.rename(columns={data.columns[0]: 'Região/UF'})
     data = data.replace('-', 0)
     data.iloc[:, 1:] = data.iloc[:, 1:].apply(pd.to_numeric, errors='coerce')
+    data['Região/UF'] = data['Região/UF'].apply(lambda x: unidecode(str(x)).replace('..', '').strip())  # Removendo os '..'
     return data
 
 def transform_data(data):
@@ -24,7 +25,7 @@ def transform_data(data):
         for i, year in enumerate(years):
             year_data = row.iloc[i*12+1:i*12+13].values
             for month, value in zip(range(1, 13), year_data):
-                transformed_data.append([region_uf, year, month, value])
+                transformed_data.append([region_uf, year, month, int(value) if pd.notna(value) else 0])  # Garantir valor como inteiro
     transformed_df = pd.DataFrame(transformed_data, columns=['Região/UF', 'Ano', 'Mês', 'Valor'])
     return transformed_df
 

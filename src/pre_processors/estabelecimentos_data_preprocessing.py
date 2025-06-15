@@ -7,14 +7,25 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 def clean_data(file_path, skip_rows=7, delimiter=';'):
     data = pd.read_csv(file_path, encoding='ISO-8859-1', sep=delimiter, skiprows=skip_rows)
+    print(f"Dados lidos do arquivo {file_path}. Colunas: {data.columns.tolist()}") 
+
     data = data[~data.iloc[:, 0].str.contains('Fonte:|Nota:|Morbidade|Cadastro Nacional|Sistema de|Período', na=False)]
     total_index = data[data.iloc[:, 0].str.contains('Total', na=False)].index
     if len(total_index) > 0:
         total_index = total_index[0]
         data = data.iloc[:total_index]
+    
     if 'Região/UF' not in data.columns:
-        data = data.rename(columns={data.columns[0]: 'Região/UF'})
-    data = data.dropna(subset=['Região/UF'])
+        print(f"A coluna 'Região/UF' não encontrada no arquivo {file_path}. Tentando renomear.")
+        if 'Região/Unidade' in data.columns:
+            data = data.rename(columns={'Região/Unidade': 'UF'})
+        elif 'Região Nordeste' in data.columns:
+            data = data.rename(columns={'Região Nordeste': 'UF'})
+        else:
+            data = data.rename(columns={data.columns[0]: 'UF'})  
+    
+    data = data.rename(columns={'Região/UF': 'UF'})
+    data = data.dropna(subset=['UF'])
     data = data.replace('-', 0)
     data.iloc[:, 1:] = data.iloc[:, 1:].apply(pd.to_numeric, errors='coerce')
     return data
@@ -40,18 +51,20 @@ def transform_data(data, year):
     ]
     transformed_data = []
     for _, row in data.iterrows():
-        region_uf = row['Região/UF']
+        region_uf = row['UF']
         for i, value in enumerate(row[1:]):
             if i < len(team_names):
                 transformed_data.append([region_uf, year, team_names[i], value])
-    transformed_df = pd.DataFrame(transformed_data, columns=['Região/UF', 'Ano', 'Tipo de Equipe', 'Valor'])
+    transformed_df = pd.DataFrame(transformed_data, columns=['UF', 'Ano', 'Tipo de Equipe', 'Valor'])
     return transformed_df
 
 def remove_accents_and_rename(df):
     df.columns = [unidecode(col) for col in df.columns]
     for col in df.select_dtypes(include=['object']).columns:
         df[col] = df[col].apply(lambda x: unidecode(x) if isinstance(x, str) else x)
-    df = df.rename(columns={'Regiao/UF': 'UF'})
+    
+    df['UF'] = df['UF'].apply(lambda x: str(x).replace('..', '').strip())  # Remover '..' dos dados de UF
+    df['Valor'] = df['Valor'].fillna(0).astype(int)  # Garantir que 'Valor' seja inteiro
     return df
 
 raw_data_path = 'src/data/raw'
