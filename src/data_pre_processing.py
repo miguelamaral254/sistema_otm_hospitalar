@@ -1,12 +1,12 @@
 import os
 import subprocess
 
-influenza_script = 'src/processors/influenza_data_preprocessing.py'
-equipes_script = 'src/processors/equipes_data_preprocessing.py'
-estabelecimentos_script = 'src/processors/estabelecimentos_data_preprocessing.py'
-obitos_script = 'src/processors/obitos_data_preprocessing.py'
-leitos_script = 'src/processors/leitos_data_preprocessing.py'
-vacinas_script = 'src/processors/doses_vacinadas_data_preprocessing.py'
+influenza_script = 'src/pre_processors/influenza_data_preprocessing.py'
+equipes_script = 'src/pre_processors/equipes_data_preprocessing.py'
+estabelecimentos_script = 'src/pre_processors/estabelecimentos_data_preprocessing.py'
+obitos_script = 'src/pre_processors/obitos_data_preprocessing.py'
+leitos_script = 'src/pre_processors/leitos_data_preprocessing.py'
+vacinas_script = 'src/pre_processors/doses_vacinadas_data_preprocessing.py'
 
 def run_script(script_path):
     try:
