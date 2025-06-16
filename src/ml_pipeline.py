@@ -18,19 +18,87 @@ def criar_sessao_spark():
     spark.sparkContext.setLogLevel("ERROR")  
     return spark
 
+def limpar_cache(spark):
+    spark.catalog.clearCache()
+
+def verificar_sucesso(statuses):
+    if all(statuses):
+        print("Machine Learning completo")
+    else:
+        print("Pipeline não foi completado com sucesso")
+
 def main():
     spark = criar_sessao_spark()
     
     print("Iniciando o pipeline de Machine Learning...")
-    
-    processar_vacinas(spark)
-    processar_equipes(spark)
-    processar_dados_populacao(spark)
-    processar_influenza(spark)
-    processar_leitos_sus_nao_sus(spark)
-    processar_morbidade(spark)
-    processar_tipo_estabelecimento(spark)
-  
+
+    statuses = []
+
+    try:
+        processar_vacinas(spark)
+        print("processar_vacinas() sucesso")
+        limpar_cache(spark)
+        statuses.append(True)
+    except Exception as e:
+        print(f"processar_vacinas() falhou: {e}")
+        statuses.append(False)
+
+    try:
+        processar_equipes(spark)
+        print("processar_equipes() sucesso")
+        limpar_cache(spark)
+        statuses.append(True)
+    except Exception as e:
+        print(f"processar_equipes() falhou: {e}")
+        statuses.append(False)
+
+    try:
+        processar_dados_populacao(spark)
+        print("processar_dados_populacao() sucesso")
+        limpar_cache(spark)
+        statuses.append(True)
+    except Exception as e:
+        print(f"processar_dados_populacao() falhou: {e}")
+        statuses.append(False)
+
+    try:
+        processar_influenza(spark)
+        print("processar_influenza() sucesso")
+        limpar_cache(spark)
+        statuses.append(True)
+    except Exception as e:
+        print(f"processar_influenza() falhou: {e}")
+        statuses.append(False)
+
+    try:
+        processar_leitos_sus_nao_sus(spark)
+        print("processar_leitos_sus_nao_sus() sucesso")
+        limpar_cache(spark)
+        statuses.append(True)
+    except Exception as e:
+        print(f"processar_leitos_sus_nao_sus() falhou: {e}")
+        statuses.append(False)
+
+    try:
+        processar_morbidade(spark)
+        print("processar_morbidade() sucesso")
+        limpar_cache(spark)
+        statuses.append(True)
+    except Exception as e:
+        print(f"processar_morbidade() falhou: {e}")
+        statuses.append(False)
+
+    try:
+        processar_tipo_estabelecimento(spark)
+        print("processar_tipo_estabelecimento() sucesso")
+        limpar_cache(spark)
+        statuses.append(True)
+    except Exception as e:
+        print(f"processar_tipo_estabelecimento() falhou: {e}")
+        statuses.append(False)
+
+    verificar_sucesso(statuses)
+
     spark.stop()
 
 if __name__ == "__main__":

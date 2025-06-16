@@ -20,9 +20,9 @@ def processar_vacinas(spark):
     lr = LinearRegression(featuresCol="features", labelCol="total_doses")
     lr_model = lr.fit(train_data)
 
-    return avaliar_modelo(lr_model, test_data)
+    return avaliar_modelo(lr_model, test_data, df)
 
-def avaliar_modelo(lr_model, test_data):
+def avaliar_modelo(lr_model, test_data, df):
     predictions = lr_model.transform(test_data)
 
     evaluator_rmse = RegressionEvaluator(labelCol="total_doses", predictionCol="prediction", metricName="rmse")
@@ -35,9 +35,9 @@ def avaliar_modelo(lr_model, test_data):
     mape = mape.withColumn("percent_error", (col("error") / col("total_doses")) * 100)
     mape_value = mape.agg({"percent_error": "avg"}).collect()[0][0]
 
-    generate_pdf(rmse, mae, mape_value)
+    generate_pdf(rmse, mae, mape_value, df)
 
-def generate_pdf(rmse, mae, mape):
+def generate_pdf(rmse, mae, mape, df):
     pdf_filename = "artifacts/resultados_modelo_vacinas.pdf"
     
     c = canvas.Canvas(pdf_filename, pagesize=letter)
@@ -50,5 +50,13 @@ def generate_pdf(rmse, mae, mape):
     c.drawString(100, height - 130, f"RMSE: {rmse}")
     c.drawString(100, height - 160, f"MAE: {mae}")
     c.drawString(100, height - 190, f"MAPE: {mape}%")
+    
+    c.drawString(100, height - 220, "Colunas usadas e seus tipos:")
+
+    y_position = height - 250
+    for column in df.columns:
+        column_type = str(df.schema[column].dataType)
+        c.drawString(100, y_position, f"{column}: {column_type}")
+        y_position -= 20
 
     c.save()

@@ -10,3 +10,4 @@ seaborn
 tensorflow
 openpyxl
 reportlab
+gdown
