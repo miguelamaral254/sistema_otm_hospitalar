@@ -1,52 +1,92 @@
 
+# Projeto PySpark - Setup Rápido com Docker, Spark e Java 17
 
-⸻
+Este guia fornece instruções para configurar rapidamente um ambiente PySpark local usando Docker, Java 17 e Python 3.9.
 
-Projeto PySpark - Setup Rápido com Docker, Spark e Java 17
+## Requisitos
 
-Requisitos
-	•	Docker instalado
-	•	Java 17 instalado (OpenJDK 17)
-	•	Python 3.11 (ou compatível) com pyspark instalado
+Antes de começar, certifique-se de ter o seguinte instalado em sua máquina:
 
-⸻
+- **Docker** (instale a versão mais recente a partir do [site oficial](https://www.docker.com/get-started))
+- **Java 17** (OpenJDK 17)
+- **Python 3.9** (ou versão compatível) com o `pyspark` instalado
 
-Passo 1: Configurar ambiente Java 17
+## Passo 1: Configurar o Ambiente Java 17
 
-Verifique o Java instalado:
+### Verificar a instalação do Java
 
+Para verificar se o Java está instalado corretamente, execute o seguinte comando no terminal:
+
+```bash
 java -version
+```
 
-Deve mostrar algo como:
+Você deve ver uma saída semelhante a:
 
+```
 openjdk version "17.0.13" ...
+```
 
+Se você não tiver o Java instalado, você pode [baixá-lo aqui](https://adoptopenjdk.net/) ou usar o Homebrew (para MacOS):
 
-⸻
+```bash
+brew install openjdk@17
+```
 
-Passo 2: Rodar Spark local com Docker
-	1.	Baixe a imagem oficial do Spark com Hadoop:
+Após instalar, adicione o Java 17 ao seu ambiente com o comando:
 
+```bash
+export JAVA_HOME=$(/usr/libexec/java_home -v17)
+```
+
+## Passo 2: Rodar Spark Local com Docker
+
+### Baixar a Imagem do Spark com Hadoop
+
+Execute o comando abaixo para baixar a imagem oficial do Spark com Hadoop:
+
+```bash
 docker pull bitnami/spark:latest
+```
 
-	2.	Inicie um container Spark standalone:
+### Iniciar o Container Spark Standalone
 
+Execute o comando abaixo para iniciar o container Spark em modo standalone:
+
+```bash
 docker run -d --name spark-master -p 7077:7077 -p 8080:8080 bitnami/spark:latest
+```
 
-	•	7077 é a porta padrão do Spark master
-	•	8080 é a porta da UI web do Spark
+- **7077** é a porta padrão do Spark Master
+- **8080** é a porta da UI web do Spark (você pode monitorar o status do Spark acessando [http://localhost:8080](http://localhost:8080))
 
-⸻
+## Passo 3: Configurar PySpark para Rodar Localmente
 
-Passo 3: Configurar PySpark para rodar localmente
+### Criar o Ambiente Virtual com Python 3.9
 
-No seu script Python (teste.py), use:
+Crie um ambiente virtual com Python 3.9 para garantir compatibilidade com o PySpark:
 
+```bash
+python3.9 -m venv venv
+source venv/bin/activate
+```
+
+### Instalar as Dependências
+
+Dentro do ambiente virtual, instale o `pyspark` e outras dependências necessárias:
+
+```bash
+pip install pyspark
+```
+
+### Criar o Script de Teste
+
+Crie um arquivo de teste (por exemplo, `teste.py`) e configure o Spark localmente com o seguinte código:
+
+```python
 from pyspark.sql import SparkSession
 
-spark = SparkSession.builder \
-    .appName("Teste PySpark") \
-    .master("local[*]") \  # roda localmente com todos os núcleos
+spark = SparkSession.builder     .appName("Teste PySpark")     .master("local[*]") \  # Roda localmente utilizando todos os núcleos disponíveis
     .getOrCreate()
 
 df = spark.createDataFrame([
@@ -57,40 +97,50 @@ df = spark.createDataFrame([
 df.show()
 
 spark.stop()
+```
 
+### Executar o Script PySpark
 
-⸻
+Agora, você pode rodar o script PySpark para testar sua instalação:
 
-Passo 4: Rodar o script PySpark
-
-Ative seu virtualenv (se usar) e execute:
-
+```bash
 python teste.py
+```
 
-Você verá o DataFrame sendo exibido no terminal.
+Você verá a saída no terminal com o DataFrame exibido.
 
-⸻
+## Passo 4: Rodar o Projeto - Executando o Arquivo Starter
 
-Passo 5 (opcional): Conectar ao Spark master no Docker
+### Como Executar o Projeto
 
-Se quiser rodar no cluster Docker:
-	•	Garanta que o container Spark está rodando
-	•	No script, altere .master() para o IP correto do host Docker, por exemplo:
+Para executar o seu projeto PySpark, basta rodar o script `starter.py`, que inicializa todo o pipeline de processamento de dados:
 
-.master("spark://localhost:7077")
+```bash
+python starter.py
+```
 
-	•	Atenção: host.docker.internal pode não funcionar no Mac/Linux. Use o IP da máquina.
+Esse arquivo `starter.py` vai rodar os processos de machine learning necessários e executar os pipelines conforme configurado no projeto.
 
-⸻
+## Passo 5 (Opcional): Conectar ao Spark Master no Docker
 
-Dicas rápidas
-	•	Defina variável de ambiente para IP local, se necessário:
+Se você deseja rodar o PySpark em um cluster Docker:
 
-export SPARK_LOCAL_IP=192.168.x.x
+1. Certifique-se de que o container Spark está rodando.
+2. Alterar no script PySpark o parâmetro `.master()` para o IP correto do host Docker:
 
-	•	Use a UI web em http://localhost:8080 para monitorar o Spark.
+```python
+spark = SparkSession.builder     .appName("Teste PySpark")     .master("spark://localhost:7077") \  # Use o IP do seu Docker se necessário
+    .getOrCreate()
+```
 
-⸻
+**Atenção**: No Mac/Linux, o `host.docker.internal` pode não funcionar como esperado. Use o IP local do seu Docker.
 
-Apontar pro java 17 no terminal
-export JAVA_HOME=$(/usr/libexec/java_home -v17)
+## Dicas Rápidas
+
+- Para ajustar o nível de log do Spark, você pode usar:
+
+```python
+spark.sparkContext.setLogLevel("ERROR")
+```
+
+- Para monitorar o Spark, use a UI web do Spark disponível em [http://localhost:8080](http://localhost:8080).
