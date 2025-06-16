@@ -2,13 +2,7 @@ import os
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col
 
-def processar_dados_ibge():
-    spark = SparkSession.builder \
-        .appName("ProcessarDadosIBGE") \
-        .master("local[*]") \
-        .config("spark.sql.shuffle.partitions", "8") \
-        .getOrCreate()
-
+def processar_dados_ibge(spark):
     base_path = "src/data/cleaned"
     arquivo_ibge = "Populacao_Estados_Nordeste_2024.csv" 
 
@@ -25,16 +19,9 @@ def processar_dados_ibge():
         print("Erro: Não foi possível carregar os dados do IBGE.")
         return
 
-#   print(f"Colunas lidas: {df_ibge.columns}")
     df_ibge = df_ibge.toDF(*[col_name.strip().replace(' ', '_').lower() for col_name in df_ibge.columns])
-#   print(f"Colunas normalizadas: {df_ibge.columns}")
-
     df_ibge = df_ibge.withColumn("populacao", col("populacao").cast("int")) \
                      .withColumn("ano", col("ano").cast("int"))
-                     
+
     output_path = "src/data/processed/populacao_estados_nordeste_2024.parquet"
     df_ibge.write.mode("overwrite").parquet(output_path)
-
-    spark.stop()
-
-processar_dados_ibge()

@@ -2,13 +2,7 @@ import os
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col
 
-def processar_morbidade():
-    spark = SparkSession.builder \
-        .appName("ProcessarMorbidade") \
-        .master("local[*]") \
-        .config("spark.sql.shuffle.partitions", "8") \
-        .getOrCreate()
-
+def processar_morbidade(spark):
     base_path = "src/data/cleaned"
     arquivo_morbidade = "Morbidade_Hospitalar_Regiao_Nordeste_2020_2024_Limpo.csv"
 
@@ -34,7 +28,3 @@ def processar_morbidade():
 
     output_path = "src/data/processed/morbidade_hospitalar_processed.parquet"
     df_morbidade.write.mode("overwrite").parquet(output_path)
-
-    spark.stop()
-
-processar_morbidade()

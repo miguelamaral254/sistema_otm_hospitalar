@@ -2,13 +2,7 @@ import os
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col
 
-def processar_doses_vacinas():
-    spark = SparkSession.builder \
-        .appName("ProcessarDosesVacinas") \
-        .master("local[*]") \
-        .config("spark.sql.shuffle.partitions", "8") \
-        .getOrCreate()
-
+def processar_doses_vacinas(spark):
     base_path = "src/data/cleaned"
     arquivo_doses = "Doses_vacinas_influenza_nordeste_2021_2022_Limpo.csv"
 
@@ -25,11 +19,7 @@ def processar_doses_vacinas():
         print("Erro: Não foi possível carregar os dados de doses de vacinas.")
         return
 
-    #print(f"Colunas lidas: {df_doses.columns}")
-
     df_doses = df_doses.toDF(*[col_name.strip().replace(' ', '_').lower() for col_name in df_doses.columns])
-
-    #print(f"Colunas normalizadas: {df_doses.columns}")
 
     df_doses = df_doses.withColumn("primeira_dose", col("primeira_dose").cast("double")) \
                        .withColumn("segunda_dose", col("segunda_dose").cast("double")) \
@@ -38,7 +28,3 @@ def processar_doses_vacinas():
 
     output_path = "src/data/processed/doses_vacinas_processed.parquet"
     df_doses.write.mode("overwrite").parquet(output_path)
-
-    spark.stop()
-
-processar_doses_vacinas()
