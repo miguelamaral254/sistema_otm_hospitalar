@@ -8,3 +8,4 @@ kagglehub
 matplotlib
 seaborn
 tensorflow
+openpyxl

@@ -1,5 +1,5 @@
 # Ignorar ambientes virtuais
-venv_python39/
+venv/
 
 # Ignorar arquivos de log
 *.log

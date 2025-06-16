@@ -1,11 +1,12 @@
 import os
 import subprocess
 
-influenza_script = 'src/processors/influenza_data_preprocessing.py'
-equipes_script = 'src/processors/equipes_data_preprocessing.py'
-estabelecimentos_script = 'src/processors/estabelecimentos_data_preprocessing.py'
-obitos_script = 'src/processors/obitos_data_preprocessing.py'
-leitos_script = 'src/processors/leitos_data_preprocessing.py'
+influenza_script = 'src/pre_processors/influenza_data_preprocessing.py'
+equipes_script = 'src/pre_processors/equipes_data_preprocessing.py'
+estabelecimentos_script = 'src/pre_processors/estabelecimentos_data_preprocessing.py'
+morbidade_hosp_script = 'src/pre_processors/morbidade_hospitalar_data_preprocessing.py'
+leitos_script = 'src/pre_processors/leitos_data_preprocessing.py'
+vacinas_script = 'src/pre_processors/doses_vacinadas_data_preprocessing.py'
 
 def run_script(script_path):
     try:
@@ -20,7 +21,8 @@ if not os.path.exists(cleaned_data_path):
 #run_script(influenza_script)
 #run_script(equipes_script)
 #run_script(estabelecimentos_script)
-#run_script(obitos_script)
-run_script(leitos_script)
+run_script(morbidade_hosp_script)
+#run_script(leitos_script)
+#run_script(vacinas_script)
 
 print("Todos os arquivos foram processados e salvos com sucesso!")
