@@ -7,6 +7,7 @@ estabelecimentos_script = 'src/pre_processors/estabelecimentos_data_preprocessin
 morbidade_hosp_script = 'src/pre_processors/morbidade_hospitalar_data_preprocessing.py'
 leitos_script = 'src/pre_processors/leitos_data_preprocessing.py'
 vacinas_script = 'src/pre_processors/doses_vacinadas_data_preprocessing.py'
+ibge_script = 'src/pre_processors/ibge_data_preprocessing.py'
 
 def run_script(script_path):
     try:
@@ -18,11 +19,12 @@ cleaned_data_path = 'src/data/cleaned'
 if not os.path.exists(cleaned_data_path):
     os.makedirs(cleaned_data_path)
 
-#run_script(influenza_script)
-#run_script(equipes_script)
-#run_script(estabelecimentos_script)
+run_script(influenza_script)
+run_script(equipes_script)
+run_script(estabelecimentos_script)
 run_script(morbidade_hosp_script)
-#run_script(leitos_script)
-#run_script(vacinas_script)
+run_script(leitos_script)
+run_script(vacinas_script)
+run_script(ibge_script)
 
 print("Todos os arquivos foram processados e salvos com sucesso!")

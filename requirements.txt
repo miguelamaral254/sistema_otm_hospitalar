@@ -9,3 +9,5 @@ matplotlib
 seaborn
 tensorflow
 openpyxl
+reportlab
+gdown

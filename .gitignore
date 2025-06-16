@@ -14,6 +14,8 @@ venv/
 # Ignorar arquivos gerados
 *.csv
 *.parquet
+*.pdf
+*.xlsx
 
 # Ignorar diretórios de cache do Python
 __pycache__/
