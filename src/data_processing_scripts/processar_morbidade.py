@@ -21,19 +21,16 @@ def processar_morbidade():
             return None
 
     df_morbidade = ler_csv(arquivo_morbidade)
+    
     if df_morbidade is None:
         print("Erro: Não foi possível carregar os dados de morbidade.")
         return
-
-#    print(f"Colunas lidas: {df_morbidade.columns}")
-
+    
     df_morbidade = df_morbidade.toDF(*[col_name.strip().replace(' ', '_').lower() for col_name in df_morbidade.columns])
+    df_morbidade = df_morbidade.withColumn("ano", col("ano").cast("int"))
 
-#    print(f"Colunas normalizadas: {df_morbidade.columns}")
-
-    df_morbidade = df_morbidade.withColumn("ano", col("ano").cast("int")) \
-                               .withColumn("mes", col("mes").cast("int")) \
-                               .withColumn("valor", col("valor").cast("int"))
+    months_columns = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
+    df_morbidade = df_morbidade.select("uf", "ano", *months_columns)
 
     output_path = "src/data/processed/morbidade_hospitalar_processed.parquet"
     df_morbidade.write.mode("overwrite").parquet(output_path)

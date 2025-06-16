@@ -25,9 +25,11 @@ def processar_dados_equipes():
         print("Erro: Não foi possível carregar os dados das equipes.")
         return
     
+    # Ajuste para renomear as colunas, caso necessário
     df_equipes = df_equipes.toDF(*[col_name.strip().replace(' ', '_').lower() for col_name in df_equipes.columns])
-    df_equipes = df_equipes.withColumn("ano", col("ano").cast("int")) \
-                           .withColumn("valor", col("valor").cast("int"))
+    
+    # Apenas cast para 'ano', sem a tentativa de 'valor'
+    df_equipes = df_equipes.withColumn("ano", col("ano").cast("int"))
 
     output_path = "src/data/processed/equipes_saude_processed.parquet" 
     df_equipes.write.mode("overwrite").parquet(output_path)

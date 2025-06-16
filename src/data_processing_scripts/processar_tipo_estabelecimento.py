@@ -9,6 +9,9 @@ def processar_tipo_estabelecimento():
         .config("spark.sql.shuffle.partitions", "8") \
         .getOrCreate()
 
+    # Reduzindo o nível de log para erros apenas
+    spark.sparkContext.setLogLevel("ERROR")
+
     base_path = "src/data/cleaned"
     arquivo_estabelecimento = "Tipo_de_Estabelecimento_2020_2024_Limpo.csv"  # Nome do arquivo CSV
 
@@ -26,16 +29,11 @@ def processar_tipo_estabelecimento():
         print("Erro: Não foi possível carregar os dados do Tipo de Estabelecimento.")
         return
 
-    print(f"Colunas lidas: {df_estabelecimento.columns}")
-
     # Normaliza os nomes das colunas
     df_estabelecimento = df_estabelecimento.toDF(*[col_name.strip().replace(' ', '_').lower() for col_name in df_estabelecimento.columns])
 
-    print(f"Colunas normalizadas: {df_estabelecimento.columns}")
-
     # Converte os tipos das colunas
-    df_estabelecimento = df_estabelecimento.withColumn("ano", col("ano").cast("int")) \
-                                           .withColumn("valor", col("valor").cast("int"))
+    df_estabelecimento = df_estabelecimento.withColumn("ano", col("ano").cast("int"))
 
     # Salva o dataframe no formato parquet
     output_path = "src/data/processed/tipo_estabelecimento_processed.parquet"
