@@ -40,7 +40,7 @@ years = range(2020, 2025)
 all_data = pd.DataFrame()
 
 for year in years:
-    file_name = f'LEITO SUS E NÃO SUS {year}.csv'
+    file_name = f'LEITO SUS E NAO SUS {year}.csv'
     file_path = os.path.join(raw_data_path, file_name)
     if os.path.exists(file_path):
         try:
