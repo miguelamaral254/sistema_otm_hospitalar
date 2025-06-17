@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from pyspark.sql.functions import col
+from pyspark.sql.functions import col, monotonically_increasing_id
 from pyspark.sql import SparkSession
 
 load_dotenv()
@@ -8,7 +8,39 @@ load_dotenv()
 def carregar_csv_para_postgres(spark, csv_path, table_name, db_url, db_properties):
     df = spark.read.option("header", "true").csv(csv_path)
     df = df.withColumn("ano", col("ano").cast("int"))
+
+    # Adiciona a coluna de id auto incrementado (não auto incremento diretamente no PostgreSQL, mas um id único)
+    df = df.withColumn("id", monotonically_increasing_id())
+
+    # Grava a tabela no PostgreSQL, incluindo a coluna 'id' como chave primária
     df.write.jdbc(url=db_url, table=table_name, mode="overwrite", properties=db_properties)
+
+    # Após carregar os dados, cria o índice de chave primária no PostgreSQL
+    criar_chave_primaria(db_url, db_properties, table_name)
+
+def criar_chave_primaria(db_url, db_properties, table_name):
+    import psycopg2
+
+    try:
+        conn = psycopg2.connect(db_url, user=db_properties["user"], password=db_properties["password"])
+        cursor = conn.cursor()
+
+        # Adiciona a chave primária auto-incremento após o carregamento dos dados
+        alter_table_query = f"""
+        ALTER TABLE {table_name} 
+        ADD COLUMN id SERIAL PRIMARY KEY;
+        """
+
+        cursor.execute(alter_table_query)
+        conn.commit()
+
+        cursor.close()
+        conn.close()
+
+        print(f"Chave primária 'id' adicionada à tabela {table_name} com sucesso.")
+
+    except Exception as e:
+        print(f"Erro ao adicionar chave primária na tabela {table_name}: {e}")
 
 def limpar_cache(spark):
     spark.catalog.clearCache()

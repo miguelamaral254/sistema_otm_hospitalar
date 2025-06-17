@@ -4,26 +4,18 @@ from unidecode import unidecode
 
 def clean_data(file_path):
     data = pd.read_excel(file_path, sheet_name='Sheet1')
-    # Seleciona as colunas necessárias
     data = data[['Unidade da Federação', '1ª Dose', '2ª Dose', 'Dose Única', 'Total']]
-    # Renomeia a coluna 'Unidade da Federação' para 'UF'
-    data = data.rename(columns={'Unidade da Federação': 'UF'})
-    # Substitui valores '-' por 0
+    data = data.rename(columns={'Unidade da Federação': 'uf'})
     data = data.replace('-', 0)
-    # Remove valores nulos
     data = data.dropna()
-    # Limpeza e normalização dos nomes das colunas
-    data.columns = data.columns.str.strip()  # Remove espaços extras
-    # Limpar acentos e caracteres especiais nos nomes das colunas
+    data.columns = data.columns.str.strip()
     data.columns = [unidecode(col) for col in data.columns]
-    # Substituir espaços por underscore
     data.columns = [col.replace(' ', '_') for col in data.columns]
-    # Renomear colunas para o formato desejado
     data = data.rename(columns={
-        '1a_Dose': 'Primeira_Dose',
-        '2a_Dose': 'Segunda_Dose',
-        'Dose_Única': 'Dose_Unica',
-        'Total': 'Total_Doses'
+        '1a_Dose': 'primeira_dose',
+        '2a_Dose': 'segunda_dose',
+        'Dose_Única': 'dose_Unica',
+        'Total': 'total_doses'
     })
     return data
 

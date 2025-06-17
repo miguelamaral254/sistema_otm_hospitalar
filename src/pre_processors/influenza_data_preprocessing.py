@@ -19,12 +19,12 @@ def clean_data(file_path, skip_rows=7, delimiter=';'):
     return data
 
 def transform_data(data):
-    months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
     transformed_data = []
 
     for _, row in data.iterrows():
         region_uf = row['Região/UF']
-        year_data_dict = {'UF': region_uf}
+        year_data_dict = {'uf': region_uf}
         
         for i in range(12):
             month_name = months[i]
@@ -60,9 +60,9 @@ for year in range(2020, 2025):
         all_data = pd.concat([all_data, transformed_data], ignore_index=True)
 
 all_data_sem_acentos = remove_accents_from_df(all_data)
-all_data_sem_acentos = all_data_sem_acentos.rename(columns={'Região/UF': 'UF'})
+all_data_sem_acentos = all_data_sem_acentos.rename(columns={'Região/UF': 'uf'})
 
-months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
 for month in months:
     all_data_sem_acentos[month] = all_data_sem_acentos[month].astype(int)
 

@@ -13,8 +13,8 @@ def ler_parquet():
     #file_path = "src/data/processed/leitos_sus_nao_sus_processed.parquet"
     #file_path = "src/data/processed/populacao_estados_nordeste_2024.parquet"
     #file_path = "src/data/processed/populacao_estados_nordeste_2024.parquet"
-    #file_path = "src/data/processed/morbidade_hospitalar_processed.parquet"
-    file_path = "src/data/processed/tipo_estabelecimento_processed.parquet"
+    file_path = "src/data/processed/morbidade_hospitalar_processed.parquet"
+  #  file_path = "src/data/processed/tipo_estabelecimento_processed.parquet"
     
     
     
