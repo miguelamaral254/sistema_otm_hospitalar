@@ -22,7 +22,9 @@ def clean_data(file_path, skip_rows=7, delimiter=';'):
             data = data.rename(columns={data.columns[0]: 'UF'})
     
     data = data.dropna(subset=['UF'])
+    
     data = data.replace('-', 0)
+    
     data.columns = data.columns.str.strip()
     
     for col in data.columns[1:]:
@@ -31,12 +33,12 @@ def clean_data(file_path, skip_rows=7, delimiter=';'):
     return data
 
 def transform_data(data, year):
-    months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
     transformed_data = []
 
     for _, row in data.iterrows():
-        region_uf = row['UF']
-        year_data_dict = {'UF': region_uf, 'Ano': year}
+        region_uf = row['UF'].lower()  
+        year_data_dict = {'uf': region_uf, 'ano': year}
         
         for i, month in enumerate(months):
             if i+1 < len(row): 
@@ -48,12 +50,12 @@ def transform_data(data, year):
     return pd.DataFrame(transformed_data)
 
 def remove_accents_and_clean(df):
-    df.columns = [unidecode(col) for col in df.columns]
+    df.columns = [unidecode(col).lower() for col in df.columns]  
     
     for col in df.select_dtypes(include=['object']).columns:
-        df[col] = df[col].apply(lambda x: unidecode(str(x)) if pd.notna(x) else x)
+        df[col] = df[col].apply(lambda x: unidecode(str(x)).lower() if pd.notna(x) else x)  
     
-    df['UF'] = df['UF'].str.replace('..', '').str.strip()
+    df['uf'] = df['uf'].str.replace('..', '').str.strip().str.lower()  
     
     return df
 
@@ -63,11 +65,11 @@ cleaned_data_path = 'src/data/cleaned'
 if not os.path.exists(cleaned_data_path):
     os.makedirs(cleaned_data_path)
 
-years = range(2020, 2025)
+years = range(2020, 2024)  
 all_data = pd.DataFrame()
 
 for year in years:
-    file_name = f"OBITOS {year}.csv"
+    file_name = f"mortalidade influenza mes {year}.csv"  
     file_path = os.path.join(raw_data_path, file_name)
     
     if os.path.exists(file_path):
@@ -83,12 +85,12 @@ for year in years:
 
 if not all_data.empty:
     all_data = remove_accents_and_clean(all_data)
-    months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
     for month in months:
         if month in all_data.columns:
             all_data[month] = all_data[month].astype(int)
     
-    output_file = os.path.join(cleaned_data_path, 'Morbidade_Hospitalar_Regiao_Nordeste_2020_2024_Limpo.csv')
+    output_file = os.path.join(cleaned_data_path, 'mortalidade_influenza_nordeste_2020_2023_limpo.csv')  
     all_data.to_csv(output_file, index=False)
     print("Arquivo processado e salvo com sucesso!")
 else:

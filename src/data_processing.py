@@ -6,6 +6,7 @@ from data_processing_scripts.processar_influenza import processar_influenza
 from data_processing_scripts.processar_leitos_sus_nao_sus import processar_leitos_sus_nao_sus
 from data_processing_scripts.processar_dados_ibge import processar_dados_ibge
 from data_processing_scripts.processar_tipo_estabelecimento import processar_tipo_estabelecimento
+from data.db.db_transfer import main as carregar_dados_postgres
 
 def limpar_cache(spark):
     spark.catalog.clearCache()
@@ -16,6 +17,7 @@ def main():
         .master("local[*]") \
         .config("spark.sql.shuffle.partitions", "1000") \
         .config("spark.sql.debug.maxToStringFields", "1000") \
+        .config("spark.jars", "postgresql-42.3.5.jar") \
         .getOrCreate()  
 
     print("Processamento iniciado...")
@@ -48,6 +50,10 @@ def main():
     processar_tipo_estabelecimento(spark)
     print("processar_tipo_estabelecimento() sucesso")
     limpar_cache(spark)
+
+    print("Processamento concluído. Carregando dados no PostgreSQL...")
+    
+    carregar_dados_postgres(spark)
 
     spark.stop()
 

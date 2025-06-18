@@ -28,12 +28,12 @@ def filter_nordeste_data(data: list) -> list:
 def create_dataframe(filtered_data: list) -> pd.DataFrame:
     df = pd.DataFrame(filtered_data)[["D1N", "V", "D3C"]]
     df = df.rename(columns={
-        "D1N": "UF",
-        "V": "Populacao",
-        "D3C": "Ano"
+        "D1N": "uf",
+        "V": "populacao",
+        "D3C": "ano"
     })
-    df["Populacao"] = df["Populacao"].astype(int)
-    df["Ano"] = df["Ano"].astype(int)
+    df["populacao"] = df["populacao"].astype(int)
+    df["ano"] = df["ano"].astype(int)
     return df
 
 

@@ -6,6 +6,7 @@ from pipeline_components.influenza_ml_component import processar_influenza
 from pipeline_components.leitos_ml_component import processar_leitos_sus_nao_sus
 from pipeline_components.morbidade_ml_component import processar_morbidade
 from pipeline_components.estabelecimento_ml_component import processar_tipo_estabelecimento
+from pipeline_components.analise_combinada_component import analyze_capacity_and_influenza
 
 def criar_sessao_spark():
     spark = SparkSession.builder \
@@ -14,7 +15,6 @@ def criar_sessao_spark():
         .config("spark.sql.shuffle.partitions", "100000") \
         .config("spark.sql.debug.maxToStringFields", "1000") \
         .getOrCreate()
-    
     spark.sparkContext.setLogLevel("ERROR")  
     return spark
 
@@ -29,9 +29,7 @@ def verificar_sucesso(statuses):
 
 def main():
     spark = criar_sessao_spark()
-    
     print("Iniciando o pipeline de Machine Learning...")
-
     statuses = []
 
     try:
@@ -96,9 +94,16 @@ def main():
     except Exception as e:
         print(f"processar_tipo_estabelecimento() falhou: {e}")
         statuses.append(False)
+        
+
+    try:
+        processar_influenza(spark)
+        processar_leitos_sus_nao_sus(spark)
+        analyze_capacity_and_influenza(spark)  # Nova análise combinada
+    except Exception as e:
+        print(f"Erro na análise combinada: {e}")
 
     verificar_sucesso(statuses)
-
     spark.stop()
 
 if __name__ == "__main__":

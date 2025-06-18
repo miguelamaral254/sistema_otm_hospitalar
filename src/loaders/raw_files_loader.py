@@ -4,7 +4,7 @@ import os
 import shutil
 
 def baixar_e_descompactar():
-    url = 'https://drive.google.com/uc?export=download&id=1q0Bs4HpPWGVJu_ts0DJd5P_2aYxN1kzw'
+    url = 'https://drive.google.com/uc?export=download&id=1ZVz1-KI1_N7R0jWL27K1QXaIkeKf36K6'
     download_path = "src/data/arquivo.zip"
     
     os.makedirs(os.path.dirname(download_path), exist_ok=True)
@@ -14,9 +14,13 @@ def baixar_e_descompactar():
     print(f"Arquivo baixado com sucesso em {download_path}")
 
     print("Descompactando o arquivo...")
-    with zipfile.ZipFile(download_path, 'r') as zip_ref:
-        zip_ref.extractall("src/data")
-    print("Descompactação concluída.")
+    try:
+        with zipfile.ZipFile(download_path, 'r') as zip_ref:
+            zip_ref.extractall("src/data")
+        print("Descompactação concluída.")
+    except zipfile.BadZipFile:
+        print("Erro: O arquivo baixado não é um arquivo zip válido.")
+        return
 
     if os.path.exists(download_path):
         os.remove(download_path)

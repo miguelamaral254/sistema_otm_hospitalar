@@ -11,3 +11,4 @@ tensorflow
 openpyxl
 reportlab
 gdown
+python-dotenv

@@ -45,12 +45,11 @@ def transform_data(data, year):
     transformed_data = []
     for _, row in data.iterrows():
         uf = row['UF']
-        year_data = {'UF': uf, 'Ano': year}  # Inicializando com UF e Ano
+        year_data = {'UF': uf, 'Ano': year}  
         
         for i, val in enumerate(row[1:]):
             if i < len(team_keywords):
                 team_name = clean_team_name(team_keywords[i])
-                # Substituir valores inválidos como "-" por 0
                 if isinstance(val, str) and val in ['-', 'nan', 'N/A', 'null']:
                     val = 0
                 year_data[team_name] = int(val) if pd.notna(val) else 0
@@ -65,7 +64,7 @@ def process_files(raw_path, cleaned_path, start_year=2020, end_year=2024):
     
     all_data = pd.DataFrame()
     for year in range(start_year, end_year + 1):
-        file_name = f'Equipes Saúde {year}.csv'
+        file_name = f'Equipes Saude {year}.csv'
         file_path = os.path.join(raw_path, file_name)
         if os.path.exists(file_path):
             data = clean_data(file_path)

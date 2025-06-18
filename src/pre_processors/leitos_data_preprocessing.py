@@ -22,13 +22,13 @@ def transform_data(data):
         sus_value = int(row.iloc[1]) if pd.notna(row.iloc[1]) else 0  # Garantir que seja inteiro
         nao_sus_value = int(row.iloc[2]) if pd.notna(row.iloc[2]) else 0  # Garantir que seja inteiro
         transformed_data.append([region_uf, sus_value, nao_sus_value])
-    transformed_df = pd.DataFrame(transformed_data, columns=['Região/Unidade da Federação', 'Quantidade_SUS', 'Quantidade_Nao_SUS'])
+    transformed_df = pd.DataFrame(transformed_data, columns=['Região/Unidade da Federação', 'quantidade_sus', 'quantidade_nao_sus'])
     return transformed_df
 
 def remove_accents_and_rename(df):
     df.columns = [unidecode(col) for col in df.columns]
-    df = df.rename(columns={'Regiao/Unidade da Federacao': 'UF'})  # Renomear coluna corretamente
-    df['UF'] = df['UF'].apply(lambda x: unidecode(str(x)).replace('..', '').strip())  # Remover '..' dos dados de UF
+    df = df.rename(columns={'Regiao/Unidade da Federacao': 'uf'}) 
+    df['uf'] = df['uf'].apply(lambda x: unidecode(str(x)).replace('..', '').strip())  
     return df
 
 raw_data_path = 'src/data/raw'
@@ -40,13 +40,13 @@ years = range(2020, 2025)
 all_data = pd.DataFrame()
 
 for year in years:
-    file_name = f'LEITO SUS E NÃO SUS {year}.csv'
+    file_name = f'LEITO SUS E NAO SUS {year}.csv'
     file_path = os.path.join(raw_data_path, file_name)
     if os.path.exists(file_path):
         try:
             year_data = clean_data(file_path)
             transformed_data = transform_data(year_data)
-            transformed_data['Ano'] = year
+            transformed_data['ano'] = year
             all_data = pd.concat([all_data, transformed_data], ignore_index=True)
             print(f"Arquivo 'LEITO_SUS_E_NAO_SUS_{year}_Limpo.csv' processado com sucesso.")
         except Exception as e:
