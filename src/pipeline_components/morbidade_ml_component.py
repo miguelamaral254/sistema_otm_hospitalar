@@ -55,16 +55,13 @@ def analyze_sazonality_and_uf(df):
         "sep": "Setembro", "oct": "Outubro", "nov": "Novembro", "dec": "Dezembro"
     }
     
-    # Calculate sum for each month per UF and total deaths
     total_per_uf = df.groupBy("uf").agg(
         *[spark_sum(col(month)).alias(month) for month in months],
         spark_sum(sum([col(month) for month in months])).alias("total_de_mortes")
     )
     
-    # Convert to Pandas for easier processing
     pdf = total_per_uf.toPandas()
     
-    # Find month with max deaths for each UF
     uf_stats = []
     for _, row in pdf.iterrows():
         max_val = 0
@@ -81,10 +78,8 @@ def analyze_sazonality_and_uf(df):
             "valor_maior_mes": max_val
         })
     
-    # Calculate total deaths per month across all UFs
     max_month_data = df.select(*[spark_sum(col(month)).alias(month) for month in months]).first()
     
-    # Find which month has the maximum deaths overall
     max_month_name = None
     max_month_value = 0
     for month in months:
@@ -110,21 +105,18 @@ def generate_pdf(rmse, mae, mape, df, uf_stats, max_month):
     c.drawString(100, height - 100, f"RMSE: {rmse:.2f}")
     c.drawString(100, height - 120, f"MAE: {mae:.2f}")
     c.drawString(100, height - 140, f"MAPE: {mape:.2f}%")
-
-    # Análise de Sazonalidade
     c.setFont("Helvetica-Bold", 12)
     c.drawString(100, height - 170, "Análise de Sazonalidade:")
     c.setFont("Helvetica", 12)
     c.drawString(100, height - 190, f"Mês com maior número de mortes no geral: {max_month['month']} com {max_month['value']} mortes")
     
-    # Estatísticas por Estado
     c.setFont("Helvetica-Bold", 12)
     c.drawString(100, height - 220, "Estatísticas por Estado (Mês com maior mortalidade):")
     
     y_position = height - 240
     for uf in sorted(uf_stats, key=lambda x: x["total_mortes"], reverse=True):
-        if y_position < 100:  # Verifica se ainda há espaço na página
-            c.showPage()  # Cria nova página
+        if y_position < 100:  
+            c.showPage()  
             y_position = height - 50
             c.setFont("Helvetica-Bold", 12)
             c.drawString(100, y_position, "Estatísticas por Estado (continuação):")
@@ -135,7 +127,6 @@ def generate_pdf(rmse, mae, mape, df, uf_stats, max_month):
         c.drawString(300, y_position, f"Mês com mais mortes: {uf['mes_maior_mortalidade']} ({uf['valor_maior_mes']} mortes)")
         y_position -= 20
 
-    # Colunas usadas
     c.setFont("Helvetica-Bold", 12)
     c.drawString(100, y_position - 20, "Colunas usadas e seus tipos:")
     y_position -= 40
