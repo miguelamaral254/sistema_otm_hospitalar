@@ -1,39 +1,110 @@
 from pyspark.sql import SparkSession
-import pandas as pd
+from pipeline_components.vacina_ml_component import processar_vacinas
+from pipeline_components.equipes_ml_component import processar_equipes
+from pipeline_components.populacao_ml_component import processar_dados_populacao
+from pipeline_components.influenza_ml_component import processar_influenza
+from pipeline_components.leitos_ml_component import processar_leitos_sus_nao_sus
+from pipeline_components.morbidade_ml_component import processar_morbidade
+from pipeline_components.estabelecimento_ml_component import processar_tipo_estabelecimento
+from pipeline_components.analise_combinada_component import analyze_capacity_and_influenza
 
-def load_data(input_path: str):
-    # Inicializar SparkSession
+def criar_sessao_spark():
     spark = SparkSession.builder \
-        .appName("Read Internacoes Parquet") \
+        .appName("PipelineMachineLearning") \
+        .master("local[*]") \
+        .config("spark.sql.shuffle.partitions", "100000") \
+        .config("spark.sql.debug.maxToStringFields", "1000") \
         .getOrCreate()
-    
-    # Lê o arquivo Parquet
-    df_spark = spark.read.parquet(input_path)
-    
-    # Convertendo o Spark DataFrame para Pandas
-    df = df_spark.toPandas()
-    
-    # Verifique se os dados no Pandas DataFrame são os mesmos do Spark DataFrame
-    df_spark_values = df_spark.collect()  # Coleta os dados do Spark
-    df_pandas_values = df.values  # Obtém os valores do DataFrame Pandas
+    spark.sparkContext.setLogLevel("ERROR")  
+    return spark
 
-    # Comparando os valores
-    if (df_spark_values == df_pandas_values).all():
-        print("Os dados são os mesmos após a conversão.")
+def limpar_cache(spark):
+    spark.catalog.clearCache()
+
+def verificar_sucesso(statuses):
+    if all(statuses):
+        print("Machine Learning completo")
     else:
-        print("Os dados possuem diferenças. Verifique com mais detalhes.")
-    
-    # Exibe as primeiras linhas do DataFrame para verificar se foi carregado corretamente
-    print(df.head())
-    
-    # Finaliza a sessão Spark
+        print("Pipeline não foi completado com sucesso")
+
+def main():
+    spark = criar_sessao_spark()
+    print("Iniciando o pipeline de Machine Learning...")
+    statuses = []
+
+    try:
+        processar_vacinas(spark)
+        print("processar_vacinas() sucesso")
+        limpar_cache(spark)
+        statuses.append(True)
+    except Exception as e:
+        print(f"processar_vacinas() falhou: {e}")
+        statuses.append(False)
+
+    try:
+        processar_equipes(spark)
+        print("processar_equipes() sucesso")
+        limpar_cache(spark)
+        statuses.append(True)
+    except Exception as e:
+        print(f"processar_equipes() falhou: {e}")
+        statuses.append(False)
+
+    try:
+        processar_dados_populacao(spark)
+        print("processar_dados_populacao() sucesso")
+        limpar_cache(spark)
+        statuses.append(True)
+    except Exception as e:
+        print(f"processar_dados_populacao() falhou: {e}")
+        statuses.append(False)
+
+    try:
+        processar_influenza(spark)
+        print("processar_influenza() sucesso")
+        limpar_cache(spark)
+        statuses.append(True)
+    except Exception as e:
+        print(f"processar_influenza() falhou: {e}")
+        statuses.append(False)
+
+    try:
+        processar_leitos_sus_nao_sus(spark)
+        print("processar_leitos_sus_nao_sus() sucesso")
+        limpar_cache(spark)
+        statuses.append(True)
+    except Exception as e:
+        print(f"processar_leitos_sus_nao_sus() falhou: {e}")
+        statuses.append(False)
+
+    try:
+        processar_morbidade(spark)
+        print("processar_morbidade() sucesso")
+        limpar_cache(spark)
+        statuses.append(True)
+    except Exception as e:
+        print(f"processar_morbidade() falhou: {e}")
+        statuses.append(False)
+
+    try:
+        processar_tipo_estabelecimento(spark)
+        print("processar_tipo_estabelecimento() sucesso")
+        limpar_cache(spark)
+        statuses.append(True)
+    except Exception as e:
+        print(f"processar_tipo_estabelecimento() falhou: {e}")
+        statuses.append(False)
+        
+
+    try:
+        processar_influenza(spark)
+        processar_leitos_sus_nao_sus(spark)
+        analyze_capacity_and_influenza(spark)  # Nova análise combinada
+    except Exception as e:
+        print(f"Erro na análise combinada: {e}")
+
+    verificar_sucesso(statuses)
     spark.stop()
-    
-    return df
 
 if __name__ == "__main__":
-    # Caminho para o arquivo Parquet
-    input_path = "data/processed/internacoes_processed.parquet"
-    
-    # Chama a função para carregar os dados
-    df = load_data(input_path)
+    main()

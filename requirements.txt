@@ -8,3 +8,7 @@ kagglehub
 matplotlib
 seaborn
 tensorflow
+openpyxl
+reportlab
+gdown
+python-dotenv

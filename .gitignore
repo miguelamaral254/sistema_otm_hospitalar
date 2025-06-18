@@ -1,5 +1,6 @@
 # Ignorar ambientes virtuais
-venv_python39/
+venv/
+
 
 # Ignorar arquivos de log
 *.log
@@ -14,6 +15,8 @@ venv_python39/
 # Ignorar arquivos gerados
 *.csv
 *.parquet
+*.pdf
+*.xlsx
 
 # Ignorar diretórios de cache do Python
 __pycache__/
