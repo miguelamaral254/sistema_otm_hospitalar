@@ -4,7 +4,7 @@ import os
 import shutil
 
 def baixar_e_descompactar():
-    url = 'https://drive.google.com/uc?export=download&id=1hEztu3Tde0z_XC3uK688-tgrbx9-ryAp'  # Corrigido o link
+    url = 'https://drive.google.com/uc?export=download&id=1ZVz1-KI1_N7R0jWL27K1QXaIkeKf36K6'
     download_path = "src/data/arquivo.zip"
     
     os.makedirs(os.path.dirname(download_path), exist_ok=True)

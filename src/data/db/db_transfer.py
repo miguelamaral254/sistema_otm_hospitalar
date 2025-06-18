@@ -9,13 +9,10 @@ def carregar_csv_para_postgres(spark, csv_path, table_name, db_url, db_propertie
     df = spark.read.option("header", "true").csv(csv_path)
     df = df.withColumn("ano", col("ano").cast("int"))
 
-    # Adiciona a coluna de id auto incrementado (não auto incremento diretamente no PostgreSQL, mas um id único)
     df = df.withColumn("id", monotonically_increasing_id())
 
-    # Grava a tabela no PostgreSQL, incluindo a coluna 'id' como chave primária
     df.write.jdbc(url=db_url, table=table_name, mode="overwrite", properties=db_properties)
 
-    # Após carregar os dados, cria o índice de chave primária no PostgreSQL
     criar_chave_primaria(db_url, db_properties, table_name)
 
 def criar_chave_primaria(db_url, db_properties, table_name):
@@ -25,7 +22,6 @@ def criar_chave_primaria(db_url, db_properties, table_name):
         conn = psycopg2.connect(db_url, user=db_properties["user"], password=db_properties["password"])
         cursor = conn.cursor()
 
-        # Adiciona a chave primária auto-incremento após o carregamento dos dados
         alter_table_query = f"""
         ALTER TABLE {table_name} 
         ADD COLUMN id SERIAL PRIMARY KEY;
@@ -51,7 +47,7 @@ def main(spark):
         ("src/data/cleaned/Equipes_Saude_2020_2024_Limpo.csv", "equipes_saude"),
         ("src/data/cleaned/Influenza_Regiao_Nordeste_2020_2024_Limpo.csv", "influenza_regiao_nordeste"),
         ("src/data/cleaned/Leitos_SUS_e_Nao_SUS_2020_2024_Limpo.csv", "leitos_sus_nao_sus"),
-        ("src/data/cleaned/Morbidade_Hospitalar_Regiao_Nordeste_2020_2024_Limpo.csv", "morbidade_hospitalar"),
+        ("src/data/cleaned/mortalidade_influenza_nordeste_2020_2023_limpo.csv", "morbidade_hospitalar"),
         ("src/data/cleaned/Populacao_Estados_Nordeste_2024.csv", "populacao_estados_nordeste"),
         ("src/data/cleaned/Tipo_de_Estabelecimento_2020_2024_Limpo.csv", "tipo_estabelecimento")
     ]

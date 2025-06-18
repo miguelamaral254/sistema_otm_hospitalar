@@ -4,7 +4,7 @@ from pyspark.sql.functions import col
 
 def processar_morbidade(spark):
     base_path = "src/data/cleaned"
-    arquivo_morbidade = "Morbidade_Hospitalar_Regiao_Nordeste_2020_2024_Limpo.csv"
+    arquivo_morbidade = "mortalidade_influenza_nordeste_2020_2023_limpo.csv"
     
     def ler_csv(nome_arquivo):
         file_path = os.path.join(base_path, nome_arquivo)
@@ -34,7 +34,7 @@ def processar_morbidade(spark):
     
     df_morbidade.write.mode("overwrite").parquet(output_path)
     
-    print(f"Processamento concluído. Arquivo salvo em: {output_path}")
+    #print(f"Processamento concluído. Arquivo salvo em: {output_path}")
 
 if __name__ == "__main__":
     spark = SparkSession.builder.appName("Processar Mortalidade e Morbidade").getOrCreate()
